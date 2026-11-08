@@ -1,7 +1,6 @@
 #!name=什么值得买签到
 #!desc=按设定时间签到、浏览和领奖。首次使用或凭证失效时开启抓取 Cookie。
 #!author=Cat-zaizai, Codex
-#!loon_version=3.5.1(983)
 
 [Argument]
 captureCookie = switch,false,type=boolean,tag=抓取 Cookie,desc=开启后打开 App 的签到页或任务中心。收到凭证保存通知后可关闭。
@@ -9,7 +8,7 @@ runTime = input,"15 8 * * *",type=string,tag=执行时间,desc=填写 Cron 表�
 
 [Script]
 http-request ^https:\/\/user-api\.smzdm\.com\/(?:checkin|task\/list_v2)(?:[/?]|$) script-path=https://raw.githubusercontent.com/reall-1/loon-scripts/main/smzdm_loon.js, timeout=10, tag=什么值得买获取凭证, enabled={captureCookie}
-cron ${runTime} then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/smzdm_loon.js") with timeout=300, tag="什么值得买签到"
+cron {runTime} script-path=https://raw.githubusercontent.com/reall-1/loon-scripts/main/smzdm_loon.js, timeout=300, tag=什么值得买签到
 
 [MITM]
 hostname = user-api.smzdm.com
