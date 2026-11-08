@@ -140,19 +140,32 @@ function client(account) {
   };
 }
 
+function rewardDetails(data, fallback) {
+  for (const rewards of [data, data?.task_reward_data, data?.reward_list, fallback]) {
+    if (!Array.isArray(rewards)) continue;
+    const details = rewards.filter(item => typeof item?.name === 'string' && item.name.trim())
+      .map(item => item.num == null || item.num === '' ? item.name : item.name + ' × ' + item.num);
+    if (details.length) return details.join('、');
+  }
+  return '已领取（接口未提供明细）';
+}
+
 async function runAccount(account, label, deadline) {
   const send = client(account);
   const api = (path, data = {}) => send(USER + path, data, true);
   const test = (path, data) => send(TEST + path, data, true);
   const remaining = task => Math.max(0, Number(task.task_even_num || 1) - Number(task.task_finished_num || 0));
   const token = cookieField(account.cookie, 'sess');
-  const stats = {done: 0, rewards: 0, failed: 0};
+  const stats = {done: 0, failed: 0};
+  const rewards = [];
   const logError = error => { stats.failed++; console.log(label + ' ' + error.message); };
   let checkin;
   try {
     const result = await api('/checkin');
     checkin = result.already ? '今日已签到' : '签到成功' +
-      (result.daily_num == null ? '' : '，连续 ' + result.daily_num + ' 天');
+      (result.daily_num == null ? '' : '，连续 ' + result.daily_num + ' 天') +
+      (result.cpadd == null || result.cpadd === '' ? '，接口未提供本次积分' :
+        '，本次获得 ' + result.cpadd + ' 积分');
   } catch (error) {
     checkin = '签到失败（' + error.message + '）';
     logError(error);
@@ -214,14 +227,15 @@ async function runAccount(account, label, deadline) {
     const claimed = new Set();
     async function claim(task) {
       if (!task.task_id || claimed.has(String(task.task_id))) return;
-      await send(WEB + 'ajax_activity_task_receive', {task_id: task.task_id});
+      const result = await send(WEB + 'ajax_activity_task_receive', {task_id: task.task_id});
       claimed.add(String(task.task_id));
-      stats.rewards++;
+      rewards.push((task.task_name || '任务 ' + task.task_id) + ' · ' +
+        rewardDetails(result, task.task_reward_data));
     }
     if (!zhongce && Number(first.info.activity_reward_status) === 1 && first.info.activity_id) {
       try {
-        await api('/task/activity_receive', {activity_id: first.info.activity_id});
-        stats.rewards++;
+        const result = await api('/task/activity_receive', {activity_id: first.info.activity_id});
+        rewards.push('活动阶段奖励 · ' + rewardDetails(result));
       } catch (error) { logError(error); }
     }
     let executed = false;
@@ -271,8 +285,9 @@ async function runAccount(account, label, deadline) {
     }, false);
   } catch (error) { logError(error); }
   const cutoff = Date.now() >= deadline ? '，运行时间已达上限' : '';
-  return label + ' ' + checkin + '，任务提交 ' + stats.done + '，领奖 ' + stats.rewards +
+  const summary = label + ' ' + checkin + '，任务提交 ' + stats.done + '，领奖 ' + rewards.length +
     '，失败 ' + stats.failed + cutoff;
+  return [summary, ...rewards].join('\n');
 }
 
 (async () => {
