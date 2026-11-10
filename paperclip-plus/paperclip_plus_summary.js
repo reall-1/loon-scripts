@@ -42,46 +42,26 @@ const SCRIPTS = [
     ["起点读书", "qdreader_extra_status"],
     ["什么值得买", "smzdm_extra_status"],
 
-    ["微博超话", "weibotalk_status"],
-    ["腾讯视频", "tenvideo_status"],
-    ["米游社", "mihoyo_status"],
     ["一点万象", "newmixc_status"],
     ["小米商城", "mishop_status"],
     ["小米抽奖", "milottery_status"],
-    ["小米有品", "youpin_status"],
-    ["龙湖天街 App", "lhtj_app_status"],
     ["QQ音乐", "qqmusic_status"],
     ["万达电影", "wanda_status"],
-    ["听听FM", "tingtingfm_status"],
     ["WPS", "wps_status"],
-    ["扫描全能王", "camscanner_status"],
-    ["追觅", "dreame_status"],
-    ["灵狐灵购", "linghu_status"],
-    ["NodeSeek", "nodeseek_status"],
-    ["123社区", "pan1_status"],
     ["AgentRouter", "agentrouter_status"],
     ["网上国网", "sgcc_status"],
-    ["中国移动", "cmcc_status"],
     ["小黑盒", "heybox_status"],
-    ["百度网盘", "baidunetdisk_status"],
-    ["徕芬", "laifen_status"],
-    ["泡泡玛特", "ppmt_status"],
     ["途虎养车", "tuhu_status"],
     ["海底捞", "haidilao_status"],
-    ["惠省红包墙", "huisheng_status"],
-    ["名创优品", "miniso_status"],
-    ["龙德广场", "longde_status"],
-    ["龙湖天街", "lhtj_status"],
-    ["味多美", "wedome_status"],
-    ["北京华联", "bhg_status"],
-    ["林里", "linli_status"],
 ];
 
 // 签到状态协议 v1:各脚本把自己登记在 checkin_registry({状态 key: {name, author}}),这里按索引发现脚本
 let registry = {};
 try { registry = JSON.parse($.getdata("checkin_registry") || "{}") || {}; } catch (e) {}
 const own = new Map(SCRIPTS.map(([name, key]) => [key, name]));
-const keys = [...new Set([...own.keys(), ...Object.keys(registry)])];
+const excluded = new Set(["baidunetdisk_status", "bhg_status", "camscanner_status", "cmcc_status", "dreame_status", "huisheng_status", "laifen_status", "lhtj_app_status", "lhtj_status", "linghu_status", "linli_status", "longde_status", "mihoyo_status", "miniso_status", "nodeseek_status", "pan1_status", "ppmt_status", "tenvideo_status", "tingtingfm_status", "wedome_status", "weibotalk_status", "youpin_status"]);
+const keys = [...new Set([...own.keys(), ...Object.keys(registry)])].filter(key => !excluded.has(key));
+for (const key of excluded) delete registry[key];
 
 // 数据地址:请求 http://1.1.1.1/checkin/all 时返回索引和全部签到状态,只读,不受开关影响,不发通知
 if (typeof $request !== "undefined") {
