@@ -46,6 +46,9 @@ glados_extra = switch,true,tag=【GLaDOS】签到
 qdreader_extra = switch,true,tag=【起点读书】签到
 smzdm_extra = switch,true,tag=【什么值得买】签到
 
+glados_cron = input,"10 7 * * *",tag=【GLaDOS】执行时间
+qdreader_cron = input,"11 2 * * *",tag=【起点读书】执行时间
+smzdm_cron = input,"15 8 * * *",tag=【什么值得买】执行时间
 [Script]
 cron "30 11 * * *" then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_summary.js", {${weibotalk}, ${tenvideo}, ${mihoyo}, ${newmixc}, ${mishop}, ${milottery}, ${youpin}, ${lhtj_app}, ${qqmusic}, ${wanda}, ${tingtingfm}, ${wps}, ${camscanner}, ${dreame}, ${linghu}, ${nodeseek}, ${pan1}, ${agentrouter}, ${sgcc}, ${cmcc}, ${heybox}, ${baidunetdisk}, ${laifen}, ${ppmt}, ${tuhu}, ${haidilao}, ${huisheng}, ${miniso}, ${longde}, ${lhtj}, ${wedome}, ${bhg}, ${linli}, ${glados_extra}, ${qdreader_extra}, ${smzdm_extra}}) with tag="签到汇总", img_url="https://raw.githubusercontent.com/MaYIHEI/pin/refs/heads/main/app/paperclip-checkin.png", enable=${merge}
 cron "0 8 * * *" then script("https://raw.githubusercontent.com/MaYIHEI/paperclip/refs/heads/main/app/weibotalk/weibotalk.js", {${merge}}) with tag="微博超话签到", img_url="https://raw.githubusercontent.com/MaYIHEI/pin/refs/heads/main/app/weibo.png", enable=${weibotalk}
@@ -87,8 +90,8 @@ cron "0 10 * * *" then script("https://raw.githubusercontent.com/MaYIHEI/papercl
 # 签到数据:小组件请求 http://1.1.1.1/checkin/all 时返回登记索引和全部签到状态 JSON(只读,不跑签到)
 request if ${url} ~= /^http:\/\/1\.1\.1\.1\/checkin\/all(\?|$)/i then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_summary.js") with tag="签到数据", img_url="https://raw.githubusercontent.com/MaYIHEI/pin/refs/heads/main/app/paperclip-checkin.png", timeout=10
 
-cron "10 7 * * *" then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_glados_extra.js", {${merge}}) with tag="GLaDOS签到", timeout=120, enable=${glados_extra}
+cron ${glados_cron} then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_glados_extra.js", {${merge}}) with tag="GLaDOS签到", timeout=120, enable=${glados_extra}
 
-cron "11 2 * * *" then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_qdreader_extra.js", {${merge}}) with tag="起点读书签到", timeout=60, enable=${qdreader_extra}
+cron ${qdreader_cron} then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_qdreader_extra.js", {${merge}}) with tag="起点读书签到", timeout=60, enable=${qdreader_extra}
 
-cron "15 8 * * *" then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_smzdm_extra.js", {${merge}}) with tag="什么值得买签到", timeout=300, enable=${smzdm_extra}
+cron ${smzdm_cron} then script("https://raw.githubusercontent.com/reall-1/loon-scripts/main/paperclip-plus/paperclip_plus_smzdm_extra.js", {${merge}}) with tag="什么值得买签到", timeout=300, enable=${smzdm_extra}
